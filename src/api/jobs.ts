@@ -1,7 +1,7 @@
 import { apiFetch } from "./httpClient";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://localhost:7091/api";
 
 export interface Job {
   jobId: string;
@@ -23,9 +23,11 @@ export async function getJobById(id: string) {
 }
 
 export async function createJob(job: Partial<Job>) {
+  // Remove createdBy if backend uses token for business
+  const { createdBy, ...rest } = job;
   return apiFetch<Job>(`${API_BASE}/jobs`, {
     method: "POST",
-    body: JSON.stringify(job),
+    body: JSON.stringify(rest),
   });
 }
 

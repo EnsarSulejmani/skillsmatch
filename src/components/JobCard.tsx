@@ -10,6 +10,7 @@ interface Job {
   budget: number; // budget for the job
   status: "open" | "in-progress" | "completed" | "cancelled"; // current status of the job
   applicants: string[]; // list of student IDs who applied for the job
+  businessName?: string; // for display
 }
 
 interface JobCardProps {
@@ -29,7 +30,8 @@ export default function JobCard({ job }: JobCardProps) {
           passHref
           className="text-blue-500"
         >
-          <span className="text-gray-500">Posted by:</span> {job.createdBy}
+          <span className="text-gray-500">Posted by:</span>{" "}
+          {job.businessName || job.createdBy}
         </Link>
 
         <h2 className="text-xl font-bold min-h-[2.8em] line-clamp-2">

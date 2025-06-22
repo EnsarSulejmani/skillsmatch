@@ -22,7 +22,7 @@ export function getAuthToken(): string | null {
 
 export function getUserType(): "student" | "business" | null {
   return typeof window !== "undefined"
-    ? (localStorage.getItem(USER_TYPE_KEY) as any)
+    ? (localStorage.getItem(USER_TYPE_KEY) as "student" | "business" | null)
     : null;
 }
 
@@ -34,4 +34,12 @@ export function getUserId(): string | null {
 
 export function isLoggedIn(): boolean {
   return !!getAuthToken();
+}
+
+export function isStudent(): boolean {
+  return getUserType() === "student";
+}
+
+export function isBusiness(): boolean {
+  return getUserType() === "business";
 }

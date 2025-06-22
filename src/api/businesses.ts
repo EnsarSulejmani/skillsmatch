@@ -1,7 +1,7 @@
 import { apiFetch } from "./httpClient";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://localhost:7091/api";
 
 export interface Business {
   businessId: string;
@@ -14,6 +14,7 @@ export interface Business {
   skills: string[];
   verified: boolean;
   industry: string;
+  profileImageUrl: string; // <-- add this field
 }
 
 export async function getAllBusinesses() {

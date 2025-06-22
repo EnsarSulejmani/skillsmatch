@@ -8,6 +8,8 @@ import {
   getUserType,
   getUserId,
   clearAuthSession,
+  isStudent,
+  isBusiness,
 } from "@/api/authSession";
 
 export default function NavBar() {
@@ -16,9 +18,18 @@ export default function NavBar() {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoggedIn(isLoggedIn());
-    setUserType(getUserType());
-    setUserId(getUserId());
+    function syncAuthState() {
+      const token = localStorage.getItem("skillsmatch_token");
+      const type = localStorage.getItem("skillsmatch_userType");
+      const id = localStorage.getItem("skillsmatch_userId");
+      setLoggedIn(!!token);
+      setUserType(type === "student" || type === "business" ? type : null);
+      setUserId(id || null);
+    }
+    syncAuthState();
+    // Listen for storage changes (cross-tab logout/login)
+    window.addEventListener("storage", syncAuthState);
+    return () => window.removeEventListener("storage", syncAuthState);
   }, []);
 
   function handleLogout() {
@@ -28,7 +39,7 @@ export default function NavBar() {
 
   let profileLink = "/";
   if (userType === "student" && userId)
-    profileLink = `/StudentProfile/${userId}`;
+    profileLink = `/studentprofile/${userId}`;
   if (userType === "business" && userId)
     profileLink = `/businessprofile/${userId}`;
 
@@ -59,7 +70,11 @@ export default function NavBar() {
             href={profileLink}
             className="bg-green-500 text-white px-4 py-2 rounded"
           >
-            My Profile
+            {isStudent()
+              ? "Student Profile"
+              : isBusiness()
+              ? "Business Profile"
+              : "My Profile"}
           </Link>
           <button
             onClick={handleLogout}

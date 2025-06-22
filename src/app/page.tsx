@@ -3,89 +3,35 @@ import FilterJobs from "@/components/Filters/FilterJobs";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { getAllJobs, Job } from "@/api/jobs";
+import { getAllBusinesses, Business } from "@/api/businesses";
 
 export default function Home() {
   const [offset, setOffset] = useState(0);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [businesses, setBusinesses] = useState<Business[]>([]);
 
-  // Placeholder jobs
-  const jobs = [
-    {
-      jobId: "job1",
-      createdBy: "businessA",
-      title: "Frontend Developer Needed for Portfolio Site",
-      description:
-        "Seeking a student to build a modern, responsive portfolio website using React and Tailwind CSS. Experience with Figma is a plus.",
-      skillsRequired: ["React", "Tailwind CSS", "Figma"],
-      budget: 300,
-      status: "open" as const,
-      applicants: [],
-    },
-    {
-      jobId: "job2",
-      createdBy: "businessB",
-      title: "Data Analysis for Marketing Campaign",
-      description:
-        "Analyze marketing data and provide insights. Must be proficient in Python and data visualization tools. Report writing required.",
-      skillsRequired: [
-        "Python",
-        "Pandas",
-        "Data Visualization",
-        "Report Writing",
-      ],
-      budget: 400,
-      status: "open" as const,
-      applicants: [],
-    },
-    {
-      jobId: "job3",
-      createdBy: "businessC",
-      title: "Social Media Content Creator",
-      description:
-        "Create engaging content for our social media platforms. Skills in Canva and copywriting are essential.",
-      skillsRequired: ["Canva", "Copywriting", "Social Media"],
-      budget: 250,
-      status: "open" as const,
-      applicants: [],
-    },
-    {
-      jobId: "job4",
-      createdBy: "businessA",
-      title: "Frontend Developer Needed for Portfolio Site",
-      description:
-        "Seeking a student to build a modern, responsive portfolio website using React and Tailwind CSS. Experience with Figma is a plus.",
-      skillsRequired: ["React", "Tailwind CSS", "Figma"],
-      budget: 300,
-      status: "open" as const,
-      applicants: [],
-    },
-    {
-      jobId: "job5",
-      createdBy: "businessB",
-      title: "Data Analysis for Marketing Campaign",
-      description:
-        "Analyze marketing data and provide insights. Must be proficient in Python and data visualization tools. Report writing required.",
-      skillsRequired: [
-        "Python",
-        "Pandas",
-        "Data Visualization",
-        "Report Writing",
-      ],
-      budget: 400,
-      status: "open" as const,
-      applicants: [],
-    },
-    {
-      jobId: "job6",
-      createdBy: "businessC",
-      title: "Social Media Content Creator",
-      description:
-        "Create engaging content for our social media platforms. Skills in Canva and copywriting are essential.",
-      skillsRequired: ["Canva", "Copywriting", "Social Media"],
-      budget: 250,
-      status: "open" as const,
-      applicants: [],
-    },
-  ];
+  useEffect(() => {
+    getAllJobs()
+      .then(async (jobs) => {
+        // Fetch all businesses to map businessId to name
+        const businesses = await getAllBusinesses();
+        setBusinesses(businesses);
+        // Map businessName into jobs
+        setJobs(
+          jobs.map((job) => ({
+            ...job,
+            businessName:
+              businesses.find((b) => b.businessId === job.createdBy)?.name ||
+              job.createdBy,
+          }))
+        );
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -142,7 +88,15 @@ export default function Home() {
 
       {/* Filter Jobs */}
       <section>
-        <FilterJobs jobs={jobs} />
+        {loading ? (
+          <div className="w-full flex justify-center py-8">Loading jobs...</div>
+        ) : error ? (
+          <div className="w-full flex justify-center py-8 text-red-500">
+            {error}
+          </div>
+        ) : (
+          <FilterJobs jobs={jobs} />
+        )}
       </section>
       {/* End of Filter Jobs */}
     </div>

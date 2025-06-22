@@ -1,15 +1,28 @@
 "use client";
-import { useState } from "react";
-import { login, registerStudent, registerBusiness } from "@/api/auth";
-import { saveAuthSession } from "@/api/authSession";
+import { useState, useEffect } from "react";
+import {
+  login,
+  registerStudent,
+  registerBusiness,
+  getMe,
+  logout,
+} from "@/api/auth";
+import {
+  saveAuthSession,
+  isLoggedIn,
+  getUserType,
+  getUserId,
+  clearAuthSession,
+} from "@/api/authSession";
+import { getSkills, getLocations } from "@/api/referenceData";
+import { toStudentRegistrationPayload } from "@/api/students";
 
 export default function Login() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [userType, setUserType] = useState<"student" | "business">("student");
 
   // Student registration states
-  const [studentFirstName, setStudentFirstName] = useState("");
-  const [studentLastName, setStudentLastName] = useState("");
+  const [studentName, setStudentName] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [studentPassword, setStudentPassword] = useState("");
   const [studentSkills, setStudentSkills] = useState<string[]>([]);
@@ -20,18 +33,28 @@ export default function Login() {
   const [businessName, setBusinessName] = useState("");
   const [businessEmail, setBusinessEmail] = useState("");
   const [businessPassword, setBusinessPassword] = useState("");
-  const [businessBio, setBusinessBio] = useState("");
-  const [businessLocation, setBusinessLocation] = useState("");
-  const [businessIndustry, setBusinessIndustry] = useState("");
 
   // Error and loading states
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Placeholder options
-  const skillOptions = ["HTML", "CSS", "JavaScript", "React", "Python"];
-  const studentLevels = ["Undergraduate", "Graduate", "Senior", "Junior"];
-  const locationOptions = ["New York", "London", "Berlin", "Tokyo", "Remote"];
+  const [skillOptions, setSkillOptions] = useState<string[]>([]);
+  const [locationOptions, setLocationOptions] = useState<string[]>([]);
+
+  // Fetch skills and locations
+  useEffect(() => {
+    getSkills()
+      .then(setSkillOptions)
+      .catch(() =>
+        setSkillOptions(["HTML", "CSS", "JavaScript", "React", "Python"])
+      );
+    getLocations()
+      .then(setLocationOptions)
+      .catch(() =>
+        setLocationOptions(["New York", "London", "Berlin", "Tokyo", "Remote"])
+      );
+  }, []);
 
   // Login handler
   async function handleLogin(e: React.FormEvent) {
@@ -58,14 +81,12 @@ export default function Login() {
     setError(null);
     setLoading(true);
     try {
+      // Only send required fields per API docs
       const student = {
-        firstName: studentFirstName,
-        lastName: studentLastName,
+        userType: "student",
+        name: studentName,
         email: studentEmail,
         password: studentPassword,
-        skills: studentSkills,
-        level: studentLevel,
-        bio: studentBio,
       };
       const auth = await registerStudent(student);
       saveAuthSession(auth);
@@ -84,12 +105,10 @@ export default function Login() {
     setLoading(true);
     try {
       const business = {
+        userType: "business",
         name: businessName,
         email: businessEmail,
         password: businessPassword,
-        bio: businessBio,
-        location: businessLocation,
-        industry: businessIndustry,
       };
       const auth = await registerBusiness(business);
       saveAuthSession(auth);
@@ -198,31 +217,17 @@ export default function Login() {
             className="bg-white p-8 rounded shadow-md w-96 flex flex-col gap-4"
             onSubmit={handleStudentRegister}
           >
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={studentFirstName}
-                  onChange={(e) => setStudentFirstName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={studentLastName}
-                  onChange={(e) => setStudentLastName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Name
+              </label>
+              <input
+                type="text"
+                required
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -246,61 +251,6 @@ export default function Login() {
                 value={studentPassword}
                 onChange={(e) => setStudentPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Skills
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {skillOptions.map((skill) => (
-                  <label key={skill} className="flex items-center gap-1">
-                    <input
-                      type="checkbox"
-                      value={skill}
-                      checked={studentSkills.includes(skill)}
-                      onChange={(e) => {
-                        if (e.target.checked)
-                          setStudentSkills([...studentSkills, skill]);
-                        else
-                          setStudentSkills(
-                            studentSkills.filter((s) => s !== skill)
-                          );
-                      }}
-                    />
-                    <span>{skill}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Student Level
-              </label>
-              <select
-                required
-                value={studentLevel}
-                onChange={(e) => setStudentLevel(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                <option value="">Select Level</option>
-                {studentLevels.map((level) => (
-                  <option key={level} value={level}>
-                    {level}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bio
-              </label>
-              <textarea
-                required
-                value={studentBio}
-                onChange={(e) => setStudentBio(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-                rows={3}
               />
             </div>
             {error && <div className="text-red-500 mb-2">{error}</div>}
@@ -354,50 +304,6 @@ export default function Login() {
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bio
-              </label>
-              <textarea
-                required
-                value={businessBio}
-                onChange={(e) => setBusinessBio(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-                rows={3}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location
-              </label>
-              <input
-                type="text"
-                list="location-list"
-                required
-                value={businessLocation}
-                onChange={(e) => setBusinessLocation(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="Search or select location"
-              />
-              <datalist id="location-list">
-                {locationOptions.map((loc) => (
-                  <option key={loc} value={loc} />
-                ))}
-              </datalist>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Industry
-              </label>
-              <input
-                type="text"
-                required
-                value={businessIndustry}
-                onChange={(e) => setBusinessIndustry(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="Enter industry"
-              />
-            </div>
             {error && <div className="text-red-500 mb-2">{error}</div>}
             <button
               type="submit"
@@ -408,6 +314,37 @@ export default function Login() {
             </button>
           </form>
         )}
+        {/* Session Test Buttons - For Backend Testing */}
+        <div className="mt-4 flex flex-col items-center">
+          {isLoggedIn() && (
+            <>
+              <button
+                className="bg-gray-200 px-4 py-2 rounded mb-2"
+                onClick={async () => {
+                  try {
+                    const me = await getMe();
+                    alert(`Logged in as ${me.userType} (ID: ${me.userId})`);
+                  } catch (err: any) {
+                    alert("Session invalid or expired");
+                    clearAuthSession();
+                    window.location.reload();
+                  }
+                }}
+              >
+                Test Session (GET /auth/me)
+              </button>
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded"
+                onClick={() => {
+                  logout();
+                  window.location.reload();
+                }}
+              >
+                Logout
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

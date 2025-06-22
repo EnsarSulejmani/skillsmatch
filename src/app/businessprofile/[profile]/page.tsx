@@ -1,31 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-
-interface Job {
-  jobId: string;
-  createdBy: string;
-  title: string;
-  description: string;
-  skillsRequired: string[];
-  budget: number;
-  status: "open" | "in-progress" | "completed" | "cancelled";
-  applicants: string[];
-}
-
-interface Business {
-  businessId: string;
-  name: string;
-  email: string;
-  password: string;
-  reviews: number;
-  bio: string;
-  jobsPosted: string[];
-  location: string;
-  skills: string[];
-  verified: boolean;
-  industry: string;
-}
+import { getBusinessById, Business, updateBusiness } from "@/api/businesses";
+import { getAllJobs, Job, createJob } from "@/api/jobs";
+import { getUserId, getUserType } from "@/api/authSession";
 
 export default function BusinessProfile() {
   const { profile } = useParams();
@@ -39,84 +17,75 @@ export default function BusinessProfile() {
     budget: 0,
     status: "open",
   });
-  // Placeholder: Replace with real session/user logic
-  const sessionUserId = "1";
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const sessionUserId = getUserId();
+  const userType = getUserType();
+  const [jobLoading, setJobLoading] = useState(false);
+  const [jobError, setJobError] = useState<string | null>(null);
   const skillOptions = ["React", "TypeScript", "Python", "UI/UX", "Marketing"];
 
   useEffect(() => {
-    // Simulate fetching from .NET Core Web API
-    setBusiness({
-      businessId: profile as string,
-      name: "Acme Corp",
-      email: "contact@acme.com",
-      password: "",
-      reviews: 4.7,
-      bio: "We connect students with real-world projects.",
-      jobsPosted: ["job1", "job2"],
-      location: "New York",
-      skills: ["React", "UI/UX"],
-      verified: true,
-      industry: "Tech",
-    });
-    setJobs([
-      {
-        jobId: "job1",
-        createdBy: profile as string,
-        title: "Landing Page Redesign",
-        description:
-          "Looking for a student to redesign our landing page using Next.js and Tailwind CSS.",
-        skillsRequired: ["React", "UI/UX"],
-        budget: 500,
-        status: "open",
-        applicants: [],
-      },
-      {
-        jobId: "job2",
-        createdBy: profile as string,
-        title: "Market Research",
-        description:
-          "Need a student to conduct market research for our new product line.",
-        skillsRequired: ["Marketing"],
-        budget: 300,
-        status: "completed",
-        applicants: [],
-      },
-    ]);
+    setLoading(true);
+    getBusinessById(profile as string)
+      .then(setBusiness)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+    getAllJobs()
+      .then((allJobs) =>
+        setJobs(allJobs.filter((j) => j.createdBy === profile))
+      )
+      .catch(() => {});
   }, [profile]);
 
-  if (!business) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
+  if (error || !business)
+    return <div className="text-red-500">{error || "Business not found."}</div>;
 
-  const canEdit = sessionUserId === business.businessId;
+  const canEdit =
+    sessionUserId === business.businessId && userType === "business";
 
-  const handleJobCreate = (e: React.FormEvent) => {
+  const handleJobCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      !newJob.title ||
-      !newJob.description ||
-      !newJob.skillsRequired ||
-      !newJob.budget
-    )
-      return;
-    setJobs([
-      {
-        jobId: Date.now().toString(),
-        createdBy: business.businessId,
-        title: newJob.title,
-        description: newJob.description,
-        skillsRequired: newJob.skillsRequired,
-        budget: Number(newJob.budget),
+    setJobLoading(true);
+    setJobError(null);
+    try {
+      const created = await createJob({
+        ...newJob,
+        // Do not send createdBy, backend will use session
         status: "open",
-        applicants: [],
-      },
-      ...jobs,
-    ]);
-    setNewJob({
-      title: "",
-      description: "",
-      skillsRequired: [],
-      budget: 0,
-      status: "open",
-    });
+      });
+      setJobs([created, ...jobs]);
+      setNewJob({
+        title: "",
+        description: "",
+        skillsRequired: [],
+        budget: 0,
+        status: "open",
+      });
+    } catch (err: any) {
+      setJobError(err.message);
+    } finally {
+      setJobLoading(false);
+    }
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!business) return;
+    try {
+      await updateBusiness(business.businessId, {
+        name: business.name,
+        bio: business.bio,
+        location: business.location,
+        industry: business.industry,
+        skills: business.skills,
+        profileImageUrl: business.profileImageUrl,
+      });
+      setIsEditing(false);
+    } catch (err: any) {
+      setError(err.message || "Failed to update business profile");
+    }
   };
 
   return (
@@ -133,20 +102,13 @@ export default function BusinessProfile() {
         )}
       </div>
       {isEditing ? (
-        <form className="flex flex-col gap-4">
+        <form className="flex flex-col gap-4" onSubmit={handleSave}>
           <input
             type="text"
             value={business.name}
             onChange={(e) => setBusiness({ ...business, name: e.target.value })}
             className="px-3 py-2 border rounded"
-          />
-          <input
-            type="email"
-            value={business.email}
-            onChange={(e) =>
-              setBusiness({ ...business, email: e.target.value })
-            }
-            className="px-3 py-2 border rounded"
+            required
           />
           <input
             type="text"
@@ -155,6 +117,7 @@ export default function BusinessProfile() {
               setBusiness({ ...business, location: e.target.value })
             }
             className="px-3 py-2 border rounded"
+            required
           />
           <input
             type="text"
@@ -163,12 +126,45 @@ export default function BusinessProfile() {
               setBusiness({ ...business, industry: e.target.value })
             }
             className="px-3 py-2 border rounded"
+            required
           />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Skills
+            </label>
+            <input
+              type="text"
+              value={business.skills?.join(", ") || ""}
+              onChange={(e) =>
+                setBusiness({
+                  ...business,
+                  skills: e.target.value
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter((s) => s.length > 0),
+                })
+              }
+              className="w-full px-3 py-2 border rounded"
+              required
+            />
+            <span className="text-xs text-gray-400">Comma separated</span>
+          </div>
           <textarea
-            value={business.bio}
+            value={business.bio || ""}
             onChange={(e) => setBusiness({ ...business, bio: e.target.value })}
             className="px-3 py-2 border rounded"
             rows={3}
+            required
+          />
+          <input
+            type="text"
+            value={business.profileImageUrl || ""}
+            onChange={(e) =>
+              setBusiness({ ...business, profileImageUrl: e.target.value })
+            }
+            className="px-3 py-2 border rounded"
+            placeholder="Profile Image URL"
+            required
           />
           <button
             type="submit"
@@ -272,8 +268,9 @@ export default function BusinessProfile() {
               type="submit"
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
-              Post Job
+              {jobLoading ? "Posting Job..." : "Post Job"}
             </button>
+            {jobError && <p className="text-red-500 text-sm">{jobError}</p>}
           </form>
         </div>
       )}

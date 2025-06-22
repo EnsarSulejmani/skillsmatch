@@ -1,4 +1,6 @@
 // Simple HTTP client using fetch, with JSON and error handling
+import { getAuthToken } from "./authSession";
+
 export async function apiFetch<T>(
   url: string,
   options?: RequestInit & { authToken?: string }
@@ -7,8 +9,10 @@ export async function apiFetch<T>(
     "Content-Type": "application/json",
     ...((options?.headers as Record<string, string>) || {}),
   };
-  if (options?.authToken) {
-    headers["Authorization"] = `Bearer ${options.authToken}`;
+  // Always attach token if present in session
+  const token = options?.authToken || getAuthToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
   const res = await fetch(url, { ...options, headers });
   if (!res.ok) {
