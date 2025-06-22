@@ -3,41 +3,50 @@ import Link from "next/link";
 interface Student {
   studentId: string;
   name: string;
-  level?: string;
+  email?: string;
   bio?: string;
   skills?: string[];
+  location?: string;
+  profileImageUrl?: string;
+  reviews?: number;
+  industry?: string;
 }
 
 export default function StudentCard({ student }: { student: Student }) {
   return (
-    <div className="w-[360px] h-[300px] bg-white shadow-lg rounded-lg p-4 flex flex-col gap-4">
-      <div className="w-full p-2 flex flex-col space-y-2">
-        <h2 className="text-xl font-bold min-h-[2.8em] line-clamp-2">
+    <div className="w-[340px] h-[370px] bg-gradient-to-br from-blue-50 to-white shadow-xl rounded-2xl p-5 flex flex-col gap-4 border border-blue-100 hover:scale-105 hover:shadow-2xl transition-transform duration-200">
+      <div className="flex flex-col items-center gap-2">
+        {student.profileImageUrl && (
+          <img
+            src={student.profileImageUrl}
+            alt={student.name}
+            className="w-20 h-20 rounded-full border-4 border-blue-200 object-cover shadow"
+          />
+        )}
+        <h2 className="text-xl font-extrabold text-blue-900 text-center min-h-[2.8em] line-clamp-2">
           {student.name || ""}
         </h2>
-        <p className="text-gray-600 min-h-[2em] line-clamp-1">
-          {student.level || ""}
+        <p className="text-blue-700 text-sm text-center min-h-[1.5em] line-clamp-1 font-semibold">
+          {student.industry || student.location || ""}
         </p>
-        <div className="overflow-x-scroll">
-          <div className="flex space-x-2 p-2">
-            {student.skills?.map((skill) => (
-              <span
-                key={skill}
-                className="bg-blue-300 text-white px-3 py-1 rounded-sm text-sm whitespace-nowrap"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-2 justify-center mt-1">
+          {student.skills?.slice(0, 4).map((skill) => (
+            <span
+              key={skill}
+              className="bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold"
+            >
+              {skill}
+            </span>
+          ))}
         </div>
-        <p className="text-gray-600 min-h-[3em] line-clamp-2">
-          {student.bio || ""}
-        </p>
       </div>
-      <div className="flex-1 flex items-end">
+      <p className="text-gray-700 text-sm min-h-[3em] line-clamp-2 text-center mt-2">
+        {student.bio || ""}
+      </p>
+      <div className="flex-1 flex items-end justify-center mt-2">
         <Link
           href={`/studentprofile/${student.studentId}`}
-          className="bg-blue-500 text-white px-2 py-1 rounded text-base shadow-lg hover:bg-blue-600 transition-colors duration-300 mt-auto"
+          className="bg-gradient-to-r from-blue-400 to-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:from-blue-500 hover:to-blue-700 transition"
         >
           View Profile
         </Link>

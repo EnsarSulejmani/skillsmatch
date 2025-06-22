@@ -17,57 +17,62 @@ interface JobCardProps {
   job: Job;
 }
 
+const statusColors: Record<string, string> = {
+  open: "bg-green-100 text-green-700 border-green-300",
+  "in-progress": "bg-yellow-100 text-yellow-700 border-yellow-300",
+  completed: "bg-blue-100 text-blue-700 border-blue-300",
+  cancelled: "bg-red-100 text-red-700 border-red-300",
+};
+
 export default function JobCard({ job }: JobCardProps) {
   return (
-    <div className="w-[360px] bg-white shadow-lg rounded-lg p-4 flex flex-col gap-4 border-t-5 border-blue-500">
-      {/* top Section - Status + Title + description*/}
-      <div className="w-full p-2 flex flex-col space-y-2">
-        <p className="rounded-full text-sm px-2 py-1 bg-green-300 text-white w-fit">
-          {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-        </p>
-        <Link
-          href={`/businessprofile/${job.createdBy}`}
-          passHref
-          className="text-blue-500"
+    <div className="w-[340px] h-[340px] bg-white shadow rounded-xl p-5 flex flex-col gap-4 border border-blue-100 hover:shadow-lg transition-transform duration-200">
+      {/* Status + Title + Business */}
+      <div className="flex flex-col items-center gap-2">
+        <span
+          className={`px-3 py-0.5 rounded-full text-xs font-bold border ${
+            statusColors[job.status] ||
+            "bg-gray-100 text-gray-700 border-gray-300"
+          } mb-1`}
         >
-          <span className="text-gray-500">Posted by:</span>{" "}
-          {job.businessName || job.createdBy}
-        </Link>
-
-        <h2 className="text-xl font-bold min-h-[2.8em] line-clamp-2">
+          {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+        </span>
+        <h2 className="text-lg font-bold text-blue-900 text-center min-h-[2.2em] line-clamp-2">
           {job.title}
         </h2>
-        <p className="text-gray-600 min-h-[5.6em] line-clamp-4">
-          {job.description}
-        </p>
+        <Link
+          href={`/businessprofile/${job.createdBy}`}
+          className="text-blue-700 text-xs font-medium hover:underline"
+        >
+          {job.businessName || job.createdBy}
+        </Link>
       </div>
-      {/* End of Top Section */}
-
-      {/* Skills Section */}
-      <div className="overflow-x-scroll">
-        <div className="flex space-x-2 p-2">
-          {job.skillsRequired.map((skill) => (
-            <span
-              key={skill}
-              className="bg-blue-300 text-white px-3 py-1 rounded-sm text-sm whitespace-nowrap"
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
+      {/* Description */}
+      <p className="text-gray-700 text-sm min-h-[2.5em] line-clamp-2 text-center mt-1">
+        {job.description}
+      </p>
+      {/* Skills */}
+      <div className="flex flex-wrap gap-2 justify-center mt-1">
+        {job.skillsRequired.map((skill) => (
+          <span
+            key={skill}
+            className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium border border-blue-200"
+          >
+            {skill}
+          </span>
+        ))}
       </div>
-      {/* End of Skills Section */}
-
-      {/* Bottom Section - Budget + Apply Button */}
-      <div className="flex justify-between items-center">
-        <p className="text-lg font-semibold">${job.budget}</p>
+      {/* Budget + Read More */}
+      <div className="flex justify-between items-center mt-2">
+        <span className="text-base font-semibold text-blue-800">
+          ${job.budget}
+        </span>
         <Link
           href={`/job/${job.jobId}`}
-          className="bg-blue-500 text-white px-2 py-1 rounded text-base shadow-lg hover:bg-blue-600 transition-colors duration-300"
+          className="bg-blue-500 text-white px-4 py-1.5 rounded-lg font-semibold shadow hover:bg-blue-600 transition"
         >
           Read More
         </Link>
-        {/* End of Bottom Section */}
       </div>
     </div>
   );

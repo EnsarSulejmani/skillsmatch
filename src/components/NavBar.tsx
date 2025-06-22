@@ -44,31 +44,44 @@ export default function NavBar() {
     profileLink = `/businessprofile/${userId}`;
 
   return (
-    <div className="w-full flex justify-around items-center shadow p-4 bg-white">
-      <Link href="/" passHref>
+    <nav className="w-full flex justify-between items-center shadow-lg p-4 bg-gradient-to-r from-blue-100 to-blue-50 border-b border-blue-200 sticky top-0 z-50">
+      <Link href="/" passHref className="flex items-center gap-2 group">
         <Image
           src="/images/skilssmatchlogo.png"
-          width={50}
-          height={50}
+          width={48}
+          height={48}
           alt="Logo"
+          className="rounded-full border-2 border-blue-300 shadow group-hover:scale-105 transition"
         />
+        <span className="ml-2 text-2xl font-extrabold text-blue-800 tracking-tight hidden sm:inline">
+          SkillsMatch
+        </span>
       </Link>
-      <div className="flex items-center space-x-5">
-        <Link href="/" className="text-lg font-semibold">
-          Home
+      <div className="flex items-center gap-6">
+        <Link
+          href="/"
+          className="text-lg font-semibold text-blue-800 hover:text-blue-600 transition"
+        >
+          View Jobs
         </Link>
-        <Link href="/students" className="text-lg font-semibold">
-          Student
+        <Link
+          href="/students"
+          className="text-lg font-semibold text-blue-800 hover:text-blue-600 transition"
+        >
+          View Students
         </Link>
-        <Link href="/businesses" className="text-lg font-semibold">
-          Business
+        <Link
+          href="/businesses"
+          className="text-lg font-semibold text-blue-800 hover:text-blue-600 transition"
+        >
+          View Businesses
         </Link>
       </div>
       {loggedIn && userId ? (
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-4">
           <Link
             href={profileLink}
-            className="bg-green-500 text-white px-4 py-2 rounded"
+            className="bg-gradient-to-r from-green-400 to-green-600 text-white px-5 py-2 rounded-lg font-semibold shadow hover:from-green-500 hover:to-green-700 transition"
           >
             {isStudent()
               ? "Student Profile"
@@ -78,7 +91,7 @@ export default function NavBar() {
           </Link>
           <button
             onClick={handleLogout}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="bg-gradient-to-r from-red-400 to-red-600 text-white px-5 py-2 rounded-lg font-semibold shadow hover:from-red-500 hover:to-red-700 transition"
           >
             Logout
           </button>
@@ -86,11 +99,11 @@ export default function NavBar() {
       ) : (
         <Link
           href="/login"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-5 py-2 rounded-lg font-semibold shadow hover:from-blue-600 hover:to-blue-800 transition"
         >
           Login
         </Link>
       )}
-    </div>
+    </nav>
   );
 }

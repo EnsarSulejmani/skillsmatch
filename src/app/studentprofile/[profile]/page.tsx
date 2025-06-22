@@ -136,113 +136,180 @@ export default function SingleStudentProfile() {
   const canEdit = sessionUserId === student.studentId;
 
   return (
-    <div className="max-w-2xl mx-auto p-8 bg-white rounded shadow mt-8">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">{student.name}</h1>
+    <div className="max-w-3xl mx-auto p-10 bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-xl mt-12 border border-blue-100">
+      <div className="flex justify-between items-center mb-8 border-b pb-4 border-blue-200">
+        <div className="flex items-center gap-4">
+          {student.profileImageUrl && (
+            <img
+              src={student.profileImageUrl}
+              alt={student.name}
+              className="w-20 h-20 rounded-full border-4 border-blue-200 object-cover shadow"
+            />
+          )}
+          <div>
+            <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight">
+              {student.name}
+            </h1>
+            <div className="flex gap-2 mt-1">
+              {student.skills &&
+                student.skills.slice(0, 4).map((skill) => (
+                  <span
+                    key={skill}
+                    className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold"
+                  >
+                    {skill}
+                  </span>
+                ))}
+            </div>
+          </div>
+        </div>
         {canEdit && (
           <button
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition"
             onClick={() => setIsEditing((v) => !v)}
           >
-            {isEditing ? "Cancel" : "Edit"}
+            {isEditing ? "Cancel" : "Edit Profile"}
           </button>
         )}
       </div>
       {isEditing ? (
-        <form className="flex flex-col gap-4" onSubmit={handleSave}>
-          <input
-            type="text"
-            value={student.name}
-            onChange={(e) => setStudent({ ...student, name: e.target.value })}
-            className="px-3 py-2 border rounded"
-            required
-          />
+        <form
+          className="flex flex-col gap-6 bg-white p-6 rounded-xl shadow-inner border border-blue-100"
+          onSubmit={handleSave}
+        >
+          <div className="flex gap-6">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-blue-800 mb-1">
+                Name
+              </label>
+              <input
+                type="text"
+                value={student.name}
+                onChange={(e) =>
+                  setStudent({ ...student, name: e.target.value })
+                }
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                required
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-blue-800 mb-1">
+                Profile Image URL
+              </label>
+              <input
+                type="text"
+                value={student.profileImageUrl || ""}
+                onChange={(e) =>
+                  setStudent({ ...student, profileImageUrl: e.target.value })
+                }
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                placeholder="Profile Image URL"
+                required
+              />
+            </div>
+          </div>
+          <div className="flex gap-6">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-blue-800 mb-1">
+                Location
+              </label>
+              <input
+                type="text"
+                value={student.location || ""}
+                onChange={(e) =>
+                  setStudent({ ...student, location: e.target.value })
+                }
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                placeholder="Location"
+                required
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-blue-800 mb-1">
+                Skills (comma separated)
+              </label>
+              <input
+                type="text"
+                value={student.skills?.join(", ") || ""}
+                onChange={(e) =>
+                  setStudent({
+                    ...student,
+                    skills: e.target.value
+                      .split(",")
+                      .map((s) => s.trim())
+                      .filter((s) => s.length > 0),
+                  })
+                }
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                required
+              />
+            </div>
+          </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Skills
+            <label className="block text-sm font-medium text-blue-800 mb-1">
+              Bio
             </label>
-            <input
-              type="text"
-              value={student.skills?.join(", ") || ""}
-              onChange={(e) =>
-                setStudent({
-                  ...student,
-                  skills: e.target.value
-                    .split(",")
-                    .map((s) => s.trim())
-                    .filter((s) => s.length > 0),
-                })
-              }
-              className="w-full px-3 py-2 border rounded"
+            <textarea
+              value={student.bio || ""}
+              onChange={(e) => setStudent({ ...student, bio: e.target.value })}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+              rows={4}
               required
             />
-            <span className="text-xs text-gray-400">Comma separated</span>
           </div>
-          <input
-            type="text"
-            value={student.location || ""}
-            onChange={(e) =>
-              setStudent({ ...student, location: e.target.value })
-            }
-            className="px-3 py-2 border rounded"
-            placeholder="Location"
-            required
-          />
-          <textarea
-            value={student.bio || ""}
-            onChange={(e) => setStudent({ ...student, bio: e.target.value })}
-            className="px-3 py-2 border rounded"
-            rows={3}
-            required
-          />
-          <input
-            type="text"
-            value={student.profileImageUrl || ""}
-            onChange={(e) =>
-              setStudent({ ...student, profileImageUrl: e.target.value })
-            }
-            className="px-3 py-2 border rounded"
-            placeholder="Profile Image URL"
-            required
-          />
           <button
             type="submit"
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            className="bg-green-500 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-green-600 transition self-end"
           >
-            Save
+            Save Changes
           </button>
         </form>
       ) : (
-        <div className="flex flex-col gap-2">
-          <p className="text-gray-700">
-            <span className="font-semibold">Email:</span> {student.email}
-          </p>
-          <p className="text-gray-700">
-            <span className="font-semibold">Skills:</span>{" "}
-            {student.skills && student.skills.length > 0
-              ? student.skills.join(", ")
-              : ""}
-          </p>
-          <p className="text-gray-700">
-            <span className="font-semibold">Location:</span> {student.location}
-          </p>
-          <p className="text-gray-700">
-            <span className="font-semibold">Bio:</span> {student.bio}
-          </p>
+        <div className="flex flex-col gap-3 bg-white p-6 rounded-xl shadow-inner border border-blue-100">
+          <div className="flex gap-6">
+            <div className="flex-1">
+              <p className="text-gray-700">
+                <span className="font-semibold text-blue-800">Email:</span>{" "}
+                {student.email}
+              </p>
+              <p className="text-gray-700">
+                <span className="font-semibold text-blue-800">Location:</span>{" "}
+                {student.location}
+              </p>
+            </div>
+            <div className="flex-1">
+              <p className="text-gray-700">
+                <span className="font-semibold text-blue-800">Skills:</span>{" "}
+                {student.skills?.join(", ")}
+              </p>
+            </div>
+          </div>
+          <div>
+            <p className="text-gray-700 mt-2">
+              <span className="font-semibold text-blue-800">Bio:</span>{" "}
+              {student.bio}
+            </p>
+          </div>
         </div>
       )}
       {/* Completed Jobs Section */}
-      <div className="max-w-2xl mx-auto mt-8">
-        <h2 className="text-xl font-bold mb-4">Completed Jobs</h2>
+      <div className="max-w-2xl mx-auto mt-12">
+        <h2 className="text-2xl font-bold mb-4 text-blue-900">
+          Completed Jobs
+        </h2>
         {completedJobs.length === 0 ? (
           <p className="text-gray-500">No completed jobs yet.</p>
         ) : (
           <ul className="space-y-4">
             {completedJobs.map((job) => (
-              <li key={job.id} className="p-4 bg-gray-100 rounded shadow">
-                <h3 className="font-semibold text-lg">{job.title}</h3>
+              <li
+                key={job.id}
+                className="p-4 bg-gray-100 rounded-xl shadow border border-blue-100"
+              >
+                <h3 className="font-semibold text-lg text-blue-800">
+                  {job.title}
+                </h3>
                 <p className="text-gray-700">{job.description}</p>
-                {/* Example: <Link href={`/jobs/${job.id}`} className="text-blue-500 underline">View Job</Link> */}
               </li>
             ))}
           </ul>
@@ -251,7 +318,7 @@ export default function SingleStudentProfile() {
       {/* Logout Button for session management */}
       {canEdit && (
         <button
-          className="mt-6 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          className="mt-8 bg-gradient-to-r from-red-400 to-red-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:from-red-500 hover:to-red-700 transition"
           onClick={async () => {
             try {
               // Dynamically import logoutApi to avoid circular deps

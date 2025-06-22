@@ -89,48 +89,110 @@ export default function BusinessProfile() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-8 bg-white rounded shadow mt-8">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">{business.name}</h1>
+    <div className="max-w-3xl mx-auto p-10 bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-xl mt-12 border border-blue-100">
+      <div className="flex justify-between items-center mb-8 border-b pb-4 border-blue-200">
+        <div className="flex items-center gap-4">
+          {business.profileImageUrl && (
+            <img
+              src={business.profileImageUrl}
+              alt={business.name}
+              className="w-20 h-20 rounded-full border-4 border-blue-200 object-cover shadow"
+            />
+          )}
+          <div>
+            <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight">
+              {business.name}
+            </h1>
+            <div className="flex gap-2 mt-1">
+              <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+                {business.industry}
+              </span>
+              {business.verified && (
+                <span className="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                  Verified
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
         {canEdit && (
           <button
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition"
             onClick={() => setIsEditing((v) => !v)}
           >
-            {isEditing ? "Cancel" : "Edit"}
+            {isEditing ? "Cancel" : "Edit Profile"}
           </button>
         )}
       </div>
       {isEditing ? (
-        <form className="flex flex-col gap-4" onSubmit={handleSave}>
-          <input
-            type="text"
-            value={business.name}
-            onChange={(e) => setBusiness({ ...business, name: e.target.value })}
-            className="px-3 py-2 border rounded"
-            required
-          />
-          <input
-            type="text"
-            value={business.location}
-            onChange={(e) =>
-              setBusiness({ ...business, location: e.target.value })
-            }
-            className="px-3 py-2 border rounded"
-            required
-          />
-          <input
-            type="text"
-            value={business.industry}
-            onChange={(e) =>
-              setBusiness({ ...business, industry: e.target.value })
-            }
-            className="px-3 py-2 border rounded"
-            required
-          />
+        <form
+          className="flex flex-col gap-6 bg-white p-6 rounded-xl shadow-inner border border-blue-100"
+          onSubmit={handleSave}
+        >
+          <div className="flex gap-6">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-blue-800 mb-1">
+                Business Name
+              </label>
+              <input
+                type="text"
+                value={business.name}
+                onChange={(e) =>
+                  setBusiness({ ...business, name: e.target.value })
+                }
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                required
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-blue-800 mb-1">
+                Industry
+              </label>
+              <input
+                type="text"
+                value={business.industry}
+                onChange={(e) =>
+                  setBusiness({ ...business, industry: e.target.value })
+                }
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                required
+              />
+            </div>
+          </div>
+          <div className="flex gap-6">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-blue-800 mb-1">
+                Location
+              </label>
+              <input
+                type="text"
+                value={business.location}
+                onChange={(e) =>
+                  setBusiness({ ...business, location: e.target.value })
+                }
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                required
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-blue-800 mb-1">
+                Profile Image URL
+              </label>
+              <input
+                type="text"
+                value={business.profileImageUrl || ""}
+                onChange={(e) =>
+                  setBusiness({ ...business, profileImageUrl: e.target.value })
+                }
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                placeholder="Profile Image URL"
+                required
+              />
+            </div>
+          </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Skills
+            <label className="block text-sm font-medium text-blue-800 mb-1">
+              Skills (comma separated)
             </label>
             <input
               type="text"
@@ -144,83 +206,120 @@ export default function BusinessProfile() {
                     .filter((s) => s.length > 0),
                 })
               }
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
               required
             />
-            <span className="text-xs text-gray-400">Comma separated</span>
           </div>
-          <textarea
-            value={business.bio || ""}
-            onChange={(e) => setBusiness({ ...business, bio: e.target.value })}
-            className="px-3 py-2 border rounded"
-            rows={3}
-            required
-          />
-          <input
-            type="text"
-            value={business.profileImageUrl || ""}
-            onChange={(e) =>
-              setBusiness({ ...business, profileImageUrl: e.target.value })
-            }
-            className="px-3 py-2 border rounded"
-            placeholder="Profile Image URL"
-            required
-          />
+          <div>
+            <label className="block text-sm font-medium text-blue-800 mb-1">
+              Bio
+            </label>
+            <textarea
+              value={business.bio || ""}
+              onChange={(e) =>
+                setBusiness({ ...business, bio: e.target.value })
+              }
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+              rows={4}
+              required
+            />
+          </div>
           <button
             type="submit"
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            className="bg-green-500 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-green-600 transition self-end"
           >
-            Save
+            Save Changes
           </button>
         </form>
       ) : (
-        <div className="flex flex-col gap-2">
-          <p className="text-gray-700">
-            <span className="font-semibold">Email:</span> {business.email}
-          </p>
-          <p className="text-gray-700">
-            <span className="font-semibold">Location:</span> {business.location}
-          </p>
-          <p className="text-gray-700">
-            <span className="font-semibold">Industry:</span> {business.industry}
-          </p>
-          <p className="text-gray-700">
-            <span className="font-semibold">Bio:</span> {business.bio}
-          </p>
-          <p className="text-gray-700">
-            <span className="font-semibold">Verified:</span>{" "}
-            {business.verified ? "Yes" : "No"}
-          </p>
-          <p className="text-gray-700">
-            <span className="font-semibold">Reviews:</span> {business.reviews}
-          </p>
+        <div className="flex flex-col gap-3 bg-white p-6 rounded-xl shadow-inner border border-blue-100">
+          <div className="flex gap-6">
+            <div className="flex-1">
+              <p className="text-gray-700">
+                <span className="font-semibold text-blue-800">Email:</span>{" "}
+                {business.email}
+              </p>
+              <p className="text-gray-700">
+                <span className="font-semibold text-blue-800">Location:</span>{" "}
+                {business.location}
+              </p>
+              <p className="text-gray-700">
+                <span className="font-semibold text-blue-800">Industry:</span>{" "}
+                {business.industry}
+              </p>
+            </div>
+            <div className="flex-1">
+              <p className="text-gray-700">
+                <span className="font-semibold text-blue-800">Verified:</span>{" "}
+                {business.verified ? "Yes" : "No"}
+              </p>
+              <p className="text-gray-700">
+                <span className="font-semibold text-blue-800">Reviews:</span>{" "}
+                {business.reviews}
+              </p>
+            </div>
+          </div>
+          <div>
+            <p className="text-gray-700">
+              <span className="font-semibold text-blue-800">Skills:</span>{" "}
+              {business.skills?.join(", ")}
+            </p>
+            <p className="text-gray-700 mt-2">
+              <span className="font-semibold text-blue-800">Bio:</span>{" "}
+              {business.bio}
+            </p>
+          </div>
         </div>
       )}
       {/* Create Job Section */}
       {canEdit && (
-        <div className="mt-8">
-          <h2 className="text-xl font-bold mb-2">Create a New Job</h2>
-          <form onSubmit={handleJobCreate} className="flex flex-col gap-2">
-            <input
-              type="text"
-              placeholder="Job Title"
-              value={newJob.title || ""}
-              onChange={(e) => setNewJob({ ...newJob, title: e.target.value })}
-              className="px-3 py-2 border rounded"
-              required
-            />
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-4 text-blue-900">
+            Create a New Job
+          </h2>
+          <form
+            onSubmit={handleJobCreate}
+            className="flex flex-col gap-4 bg-blue-50 p-6 rounded-xl border border-blue-100 shadow-inner"
+          >
+            <div className="flex gap-6">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Job Title"
+                  value={newJob.title || ""}
+                  onChange={(e) =>
+                    setNewJob({ ...newJob, title: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <input
+                  type="number"
+                  placeholder="Budget"
+                  value={newJob.budget || ""}
+                  onChange={(e) =>
+                    setNewJob({ ...newJob, budget: Number(e.target.value) })
+                  }
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                  required
+                  min={0}
+                />
+              </div>
+            </div>
             <textarea
               placeholder="Job Description"
               value={newJob.description || ""}
               onChange={(e) =>
                 setNewJob({ ...newJob, description: e.target.value })
               }
-              className="px-3 py-2 border rounded"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
               rows={2}
               required
             />
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-blue-800 mb-1">
                 Skills Required
               </label>
               <div className="flex flex-wrap gap-2">
@@ -247,45 +346,49 @@ export default function BusinessProfile() {
                             ).filter((s) => s !== skill),
                           });
                       }}
+                      className="accent-blue-600"
                     />
-                    <span>{skill}</span>
+                    <span className="text-blue-800 text-xs font-medium">
+                      {skill}
+                    </span>
                   </label>
                 ))}
               </div>
             </div>
-            <input
-              type="number"
-              placeholder="Budget"
-              value={newJob.budget || ""}
-              onChange={(e) =>
-                setNewJob({ ...newJob, budget: Number(e.target.value) })
-              }
-              className="px-3 py-2 border rounded"
-              required
-              min={0}
-            />
             <button
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition self-end"
             >
               {jobLoading ? "Posting Job..." : "Post Job"}
             </button>
-            {jobError && <p className="text-red-500 text-sm">{jobError}</p>}
+            {jobError && (
+              <p className="text-red-500 text-sm mt-2">{jobError}</p>
+            )}
           </form>
         </div>
       )}
       {/* Previous Jobs Section */}
-      <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Previous Jobs</h2>
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold mb-4 text-blue-900">Previous Jobs</h2>
         {jobs.length === 0 ? (
           <p className="text-gray-500">No jobs posted yet.</p>
         ) : (
-          <ul className="space-y-4">
+          <ul className="space-y-6">
             {jobs.map((job) => (
-              <li key={job.jobId} className="p-4 bg-gray-100 rounded shadow">
-                <h3 className="font-semibold text-lg">{job.title}</h3>
-                <p className="text-gray-700">{job.description}</p>
-                <div className="flex flex-wrap gap-2 mt-2">
+              <li
+                key={job.jobId}
+                className="p-6 bg-white rounded-xl shadow border border-blue-100"
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-semibold text-lg text-blue-800">
+                    {job.title}
+                  </h3>
+                  <span className="bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
+                    {job.status}
+                  </span>
+                </div>
+                <p className="text-gray-700 mb-2">{job.description}</p>
+                <div className="flex flex-wrap gap-2 mb-2">
                   {job.skillsRequired.map((skill) => (
                     <span
                       key={skill}
@@ -295,11 +398,8 @@ export default function BusinessProfile() {
                     </span>
                   ))}
                 </div>
-                <div className="mt-2 text-sm text-gray-600">
+                <div className="text-sm text-gray-600">
                   Budget: ${job.budget}
-                </div>
-                <div className="mt-1 text-xs text-gray-500">
-                  Status: {job.status}
                 </div>
               </li>
             ))}
